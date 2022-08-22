@@ -91,8 +91,8 @@ impl <'a> TryFrom<&'a mut Entity> for (&'a mut Transform2D, &'a mut Animation, &
 }
 
 pub async fn setup_entities<'a>() -> Vec<Entity> {
-    let window_width = 800.0;
-    let window_height = 600.0;
+    let window_width = screen_width();
+    let window_height = screen_height();
     let bounds_margin = 40.0;
     let bounds = Rect::new(bounds_margin, bounds_margin, window_width - bounds_margin * 2.0, window_height - bounds_margin * 2.0);
     let boid_config = boid::Config {

@@ -2,14 +2,19 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Fishes Flocking Simulation</title>
     <style>
         html {
             font-family: Arial, sans-serif;
         }
         body {
+            margin-left: auto;
+            margin-right: auto;
             margin-top: 18px;
             width: 100%;
+            max-width: 1200px;
         }
         h1 {
             text-align: center;
@@ -18,8 +23,8 @@
         canvas {
             margin-left: auto;
             margin-right: auto;
-            width: 800px;
-            height: 600px;
+            width: 95%;
+            height: 800px;
             display: block;
         }
         .content {
@@ -42,13 +47,14 @@
         <li>The small fishes tend to flock with their own kind while avoiding the big fishes.</li>
     </ul>
     <h2>Can I see the source code?</h2>
-    <p><a href="#">Sure.</a></p>
+    <p><a href="https://github.com/eckyputrady/fish-flocking-simulation">Sure.</a></p>
 </div>
 
 
 <!-- Minified and statically hosted version of https://github.com/not-fl3/miniquad/blob/master/native/sapp-wasm/js/gl.js -->
+<script>document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || (function () {});</script> <!-- attempt to fix error in safari iOS -->
 <script src="https://not-fl3.github.io/miniquad-samples/gl.js"></script>
-<script>load("target/wasm32-unknown-unknown/release/boid-rs.wasm");</script> <!-- Your compiled wasm file -->
+<script>load("target/wasm32-unknown-unknown/release/fish-flocking-simulation.wasm");</script> <!-- Your compiled wasm file -->
 </body>
 
 </html>

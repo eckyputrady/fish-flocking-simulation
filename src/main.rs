@@ -8,6 +8,7 @@ use macroquad::prelude::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
+    next_frame().await;
     rand::srand(miniquad::date::now() as _);
     let mut entities = entities::setup_entities().await;
     loop {
