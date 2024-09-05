@@ -63,7 +63,7 @@ pub fn renderable_texture_system(input: &Vec<(&Transform2D, &RenderableTexture)>
     for (transorm, renderable_texture) in input {
         let draw_pos = transorm.pos + renderable_texture.pos_offset;
         draw_texture_ex(
-            renderable_texture.texture,
+            &renderable_texture.texture,
             draw_pos.x,
             draw_pos.y,
             renderable_texture.color,

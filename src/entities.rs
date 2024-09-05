@@ -183,7 +183,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             frame_number: 0
         }),
         renderable_texture: Some(RenderableTexture {
-            texture: texture_atlas_shark.texture,
+            texture: texture_atlas_shark.texture.weak_clone(),
             pos_offset: vec2(-40.0, -50.0),
             rot_offset_radians: -(6.28319 / 4.0),
             color: WHITE,
@@ -217,7 +217,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             frame_number: 0
         }),
         renderable_texture: Some(RenderableTexture {
-            texture: texture_atlas_fish.texture,
+            texture: texture_atlas_fish.texture.weak_clone(),
             pos_offset: vec2(-20.0, -28.0),
             rot_offset_radians: -(6.28319 / 4.0),
             color: WHITE,
@@ -252,7 +252,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             frame_number: 0
         }),
         renderable_texture: Some(RenderableTexture {
-            texture: texture_atlas_fish.texture,
+            texture: texture_atlas_fish.texture.weak_clone(),
             pos_offset: vec2(-20.0, -28.0),
             rot_offset_radians: -(6.28319 / 4.0),
             color: WHITE,
@@ -287,7 +287,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             frame_number: 0
         }),
         renderable_texture: Some(RenderableTexture {
-            texture: texture_atlas_fish.texture,
+            texture: texture_atlas_fish.texture.weak_clone(),
             pos_offset: vec2(-20.0, -28.0),
             rot_offset_radians: -(6.28319 / 4.0),
             color: WHITE,
@@ -322,7 +322,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             frame_number: 0
         }),
         renderable_texture: Some(RenderableTexture {
-            texture: texture_atlas_fish.texture,
+            texture: texture_atlas_fish.texture.weak_clone(),
             pos_offset: vec2(-20.0, -28.0),
             rot_offset_radians: -(6.28319 / 4.0),
             color: WHITE,
