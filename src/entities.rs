@@ -93,20 +93,19 @@ impl <'a> TryFrom<&'a mut Entity> for (&'a mut Transform2D, &'a mut Animation, &
 pub async fn setup_entities<'a>() -> Vec<Entity> {
     let window_width = screen_width();
     let window_height = screen_height();
-    let bounds_margin = 40.0;
-    let bounds = Rect::new(bounds_margin, bounds_margin, window_width - bounds_margin * 2.0, window_height - bounds_margin * 2.0);
+    let bounds_margin = 80.0;
     let boid_config = boid::Config {
-        bounds,
+        bounds_margin,
         neighbor_distance: 100.0,
-        separation_distance: 20.0,
-        separation_rule_weight: 0.3,
-        avoidance_rule_weight: 0.06,
-        cohesion_rule_weight: 0.01,
-        alignment_rule_weight: 0.04,
+        separation_distance: 30.0,
+        separation_rule_weight: 0.2,
+        avoidance_rule_weight: 0.09,
+        cohesion_rule_weight: 0.005,
+        alignment_rule_weight: 0.02,
         bounds_rule_weight: 0.02,
         exploration_rule_weight: 0.05,
-        field_of_view: -0.9,
-        max_speed: 80.0,
+        field_of_view: 0.9,
+        max_speed: 120.0,
         flock_id: 1,
         flock_to_avoid: Default::default()
     };
@@ -162,7 +161,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             vel: vec2(0.0, 0.0)
         }),
         config: Some(boid::Config {
-            bounds,
+            bounds_margin,
             flock_id: shark_flock_id,
             neighbor_distance: 200.0,
             separation_distance: 100.0,
@@ -241,7 +240,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             vel: vec2(0.0, 0.0)
         }),
         config: Some(boid::Config {
-            flock_id: 1,
+            // flock_id: 1,
             flock_to_avoid: vec![shark_flock_id].into_iter().collect(),
             ..boid_config.clone()
         }),
@@ -276,7 +275,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             vel: vec2(0.0, 0.0)
         }),
         config: Some(boid::Config {
-            flock_id: 2,
+            // flock_id: 2,
             flock_to_avoid: vec![shark_flock_id].into_iter().collect(),
             ..boid_config.clone()
         }),
@@ -311,7 +310,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             vel: vec2(0.0, 0.0)
         }),
         config: Some(boid::Config {
-            flock_id: 3,
+            // flock_id: 3,
             flock_to_avoid: vec![shark_flock_id].into_iter().collect(),
             ..boid_config.clone()
         }),
@@ -338,7 +337,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
     };
 
     let mut entities = vec![];
-    for _ignored in 0..30 {
+    for _ignored in 0..50 {
         entities.push(Entity {
             transform: Some(Transform2D {
                 pos: vec2(rand::gen_range(0.0, window_width), rand::gen_range(0.0, window_height)),

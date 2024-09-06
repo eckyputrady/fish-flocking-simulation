@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 
 #[derive(Clone)]
 pub struct Config {
-    pub bounds: Rect,
+    pub bounds_margin: f32,
     pub neighbor_distance: f32,
     pub separation_distance: f32,
     pub separation_rule_weight: f32,
@@ -25,28 +25,28 @@ pub struct Boid<'a> {
 }
 
 
-pub fn boids_system(boids: &mut Vec<Boid>) {
+pub fn boids_system(boids: &mut Vec<Boid>, bounds: &Rect) {
     for i in 0..boids.len() {
         let cur = boids.get(i).unwrap();
         let neighbor_indices = neighbor_indices(cur, boids, cur.config.neighbor_distance, cur.config.field_of_view);
         let neighbors = select(&boids, &neighbor_indices);
         let my_flock: Vec<&Boid> = neighbors.iter().filter(|b| b.config.flock_id == cur.config.flock_id).map(|a| *a).collect();
         let to_avoids:Vec<&Boid> = neighbors.iter().filter(|b| cur.config.flock_to_avoid.contains(&b.config.flock_id)).map(|a| *a).collect();
-        let desired_vel = separation_rule(cur, &neighbors, cur.config.separation_distance, cur.config.separation_rule_weight)
+        let acceleration = separation_rule(cur, &neighbors, cur.config.separation_distance, cur.config.separation_rule_weight)
             + cohesion_rule(cur, &my_flock, cur.config.cohesion_rule_weight)
-            + alignment_rule(cur, &my_flock, cur.config.max_speed, cur.config.alignment_rule_weight)
-            + bounds_rule(cur, &cur.config.bounds, cur.config.max_speed, cur.config.bounds_rule_weight)
-            + exploration_rule(cur, &my_flock, cur.config.max_speed, cur.config.exploration_rule_weight)
-            + avoidance_rule(cur, &to_avoids, cur.config.neighbor_distance, cur.config.neighbor_distance, cur.config.avoidance_rule_weight)
+            + alignment_rule(&my_flock, cur.config.alignment_rule_weight)
+            + bounds_rule(cur, bounds, cur.config.bounds_margin, cur.config.max_speed, cur.config.bounds_rule_weight)
+            + exploration_rule(cur, cur.config.max_speed, cur.config.exploration_rule_weight)
+            + avoidance_rule(cur, &to_avoids, cur.config.neighbor_distance, cur.config.avoidance_rule_weight)
             ;
 
-        let mut cur = boids.get_mut(i).unwrap();
-        *cur.vel += desired_vel;
+        let cur = boids.get_mut(i).unwrap();
+        *cur.vel += acceleration;
         *cur.vel = limit_vel(*cur.vel, cur.config.max_speed);
     }
 }
 
-fn exploration_rule(cur: &Boid, boids: &Vec<&Boid>, speed: f32, weight: f32) -> Vec2 {
+fn exploration_rule(cur: &Boid, speed: f32, weight: f32) -> Vec2 {
     let random_vel = vec2(rand::gen_range(-1.0, 1.0), rand::gen_range(-1.0, 1.0));
     if random_vel.dot(*cur.vel) > 0.2 {
         random_vel * speed * weight
@@ -64,51 +64,49 @@ fn limit_vel(vel: Vec2, speed: f32) -> Vec2 {
     }
 }
 
-fn alignment_rule(cur: &Boid, boids: &Vec<&Boid>, speed: f32, weight: f32) -> Vec2 {
-    weight * speed *
+fn alignment_rule(boids: &Vec<&Boid>, weight: f32) -> Vec2 {
+    weight * 
         boids.iter()
-            .map(|b| b.vel.normalize())
-            .reduce(|a, b| a + b)
-            .map(|a| a / (boids.len() as f32))
+            .map(|b| (1.0, *b.vel))
+            .reduce(|(a1, ad), (b1, bd)| (a1 + b1, ad + bd))
+            .map(|(n, d)| d / n)
             .unwrap_or(vec2(0.0, 0.0))
 }
 
 fn cohesion_rule(cur: &Boid, boids: &Vec<&Boid>, weight: f32) -> Vec2 {
-    weight *
+    weight * 
         boids.iter()
-            .map(|x| *x.pos)
-            .reduce(|a, b| a + b)
-            .map(|v| v / (boids.len() as f32))
+            .map(|b| (1.0, *b.pos))
+            .reduce(|(a1, ad), (b1, bd)| (a1 + b1, ad + bd))
+            .map(|(n, d)| d / n)
             .map(|center| center - *cur.pos)
             .unwrap_or(vec2(0.0, 0.0))
 }
 
 fn separation_rule(cur: &Boid, boids: &Vec<&Boid>, max_distance: f32, weight: f32) -> Vec2 {
     let max_distance_squared = max_distance * max_distance;
-    -weight *
+    weight * 
         boids.iter()
-            .map(|b| (b, 1.0 - (cur.pos.distance_squared(*b.pos) / max_distance_squared)))
-            .filter(|(_b, inverse_dist_prop)| *inverse_dist_prop > 0.0)
-            // .map(|(b, inverse_dist_prop)| (b.pos - cur.pos) * inverse_dist_prop * max_distance)
-            .map(|(b, inverse_dist_prop)| (*b.pos - *cur.pos) * 1.0)
-            .reduce(|a, b| a + b)
+            .map(|b| (1.0, *cur.pos - *b.pos))
+            .filter(|(_ignored, d)| d.length_squared() <= max_distance_squared)
+            .reduce(|(a1, ad), (b1, bd)| (a1 + b1, ad + bd))
+            .map(|(n, d)| d / n)
             .unwrap_or(vec2(0.0, 0.0))
 }
 
-fn avoidance_rule(cur: &Boid, boids: &Vec<&Boid>, max_distance: f32, speed: f32, weight: f32) -> Vec2 {
+fn avoidance_rule(cur: &Boid, boids: &Vec<&Boid>, max_distance: f32, weight: f32) -> Vec2 {
     let max_distance_squared = max_distance * max_distance;
-    -weight * speed *
+    weight * 
         boids.iter()
-            .map(|b| (b, 1.0 - (cur.pos.distance_squared(*b.pos) / max_distance_squared)))
-            .filter(|(_b, inverse_dist_prop)| *inverse_dist_prop > 0.0)
-            // .map(|(b, inverse_dist_prop)| (b.pos - cur.pos) * inverse_dist_prop * max_distance)
-            .map(|(b, inverse_dist_prop)| (*b.pos - *cur.pos))
-            .reduce(|a, b| a + b)
+            .map(|b| (1.0, *cur.pos - *b.pos))
+            .filter(|(_ignored, d)| d.length_squared() <= max_distance_squared)
+            .reduce(|(a1, ad), (b1, bd)| (a1 + b1, ad + bd))
+            .map(|(n, d)| d / n)
             .unwrap_or(vec2(0.0, 0.0))
-            .normalize_or_zero()
 }
 
-fn bounds_rule(boid: &Boid, rect: &Rect, speed: f32, weight: f32) -> Vec2 {
+fn bounds_rule(boid: &Boid, bounds: &Rect, margin: f32, speed: f32, weight: f32) -> Vec2 {
+    let rect = Rect::new(bounds.x + margin, bounds.y + margin, bounds.w - 2.0 * margin, bounds.h - 2.0 * margin);
     let x = if boid.pos.x < rect.left() {
         speed
     } else if boid.pos.x > rect.right() {

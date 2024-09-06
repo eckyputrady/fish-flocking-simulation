@@ -4,7 +4,7 @@
 
 [See the simulation on this page.](https://eckyputrady.github.io/fish-flocking-simulation/)
 
-- There are 5 types of fishes: 4 smaller ones and a bigger one.
+- There are 2 types of fishes: the smaller one and the bigger one.
 - The big fishes roam around independently.
 - The small fishes tend to flock with their own kind while avoiding the big fishes.
 
@@ -13,6 +13,7 @@
 - You need to have rust toolchain installed. [See here for the instruction](https://www.rust-lang.org/tools/install).
 - running: `cargo run`
 - WASM:
+  - toolchain installation: `rustup target add wasm32-unknown-unknown`
   - building: `cargo build --target wasm32-unknown-unknown --release`
   - running:
     - Setup a webserver in this project root folder, e.g. `cargo install basic-http-server && basic-http-server .`
