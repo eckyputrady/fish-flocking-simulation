@@ -6,6 +6,7 @@ pub struct Config {
     pub bounds_margin: f32,
     pub neighbor_distance: f32,
     pub separation_distance: f32,
+    pub avoidance_distance: f32,
     pub separation_rule_weight: f32,
     pub cohesion_rule_weight: f32,
     pub alignment_rule_weight: f32,
@@ -33,11 +34,11 @@ pub fn boids_system(boids: &mut Vec<Boid>, bounds: &Rect) {
         let my_flock: Vec<&Boid> = neighbors.iter().filter(|b| b.config.flock_id == cur.config.flock_id).map(|a| *a).collect();
         let to_avoids:Vec<&Boid> = neighbors.iter().filter(|b| cur.config.flock_to_avoid.contains(&b.config.flock_id)).map(|a| *a).collect();
         let acceleration = separation_rule(cur, &neighbors, cur.config.separation_distance, cur.config.separation_rule_weight)
-            + cohesion_rule(cur, &my_flock, cur.config.cohesion_rule_weight)
+            + cohesion_rule(cur, &my_flock, cur.config.separation_distance, cur.config.cohesion_rule_weight)
             + alignment_rule(&my_flock, cur.config.alignment_rule_weight)
             + bounds_rule(cur, bounds, cur.config.bounds_margin, cur.config.max_speed, cur.config.bounds_rule_weight)
             + exploration_rule(cur, cur.config.max_speed, cur.config.exploration_rule_weight)
-            + avoidance_rule(cur, &to_avoids, cur.config.neighbor_distance, cur.config.avoidance_rule_weight)
+            + avoidance_rule(cur, &to_avoids, cur.config.avoidance_distance, cur.config.avoidance_rule_weight)
             ;
 
         let cur = boids.get_mut(i).unwrap();
@@ -73,9 +74,10 @@ fn alignment_rule(boids: &Vec<&Boid>, weight: f32) -> Vec2 {
             .unwrap_or(vec2(0.0, 0.0))
 }
 
-fn cohesion_rule(cur: &Boid, boids: &Vec<&Boid>, weight: f32) -> Vec2 {
+fn cohesion_rule(cur: &Boid, boids: &Vec<&Boid>, min_distance: f32, weight: f32) -> Vec2 {
     weight * 
         boids.iter()
+            .filter(|b| (*b.pos - *cur.pos).length_squared() > min_distance)
             .map(|b| (1.0, *b.pos))
             .reduce(|(a1, ad), (b1, bd)| (a1 + b1, ad + bd))
             .map(|(n, d)| d / n)
@@ -155,7 +157,7 @@ fn is_neighbor(cur: &Boid, other: &Boid, max_distance_squared: f32, field_of_vie
     }
 
     let to_other = *other.pos - *cur.pos;
-    let is_visible_for_me = cur.vel.dot(to_other) > field_of_view;
+    let is_visible_for_me = cur.vel.normalize().dot(to_other.normalize()) > field_of_view;
     if !is_visible_for_me {
         return false;
     }

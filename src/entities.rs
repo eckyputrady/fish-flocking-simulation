@@ -93,19 +93,20 @@ impl <'a> TryFrom<&'a mut Entity> for (&'a mut Transform2D, &'a mut Animation, &
 pub async fn setup_entities<'a>() -> Vec<Entity> {
     let window_width = screen_width();
     let window_height = screen_height();
-    let bounds_margin = 80.0;
+    let bounds_margin = 120.0;
     let boid_config = boid::Config {
         bounds_margin,
-        neighbor_distance: 100.0,
-        separation_distance: 30.0,
-        separation_rule_weight: 0.2,
-        avoidance_rule_weight: 0.09,
-        cohesion_rule_weight: 0.005,
-        alignment_rule_weight: 0.02,
+        neighbor_distance: 200.0,
+        separation_distance: 20.0,
+        avoidance_distance: 80.0,
+        separation_rule_weight: 0.75,
+        avoidance_rule_weight: 0.2,
+        cohesion_rule_weight: 0.01,
+        alignment_rule_weight: 0.03,
         bounds_rule_weight: 0.02,
-        exploration_rule_weight: 0.05,
-        field_of_view: 0.9,
-        max_speed: 120.0,
+        exploration_rule_weight: 0.04,
+        field_of_view: -0.5,
+        max_speed: 140.0,
         flock_id: 1,
         flock_to_avoid: Default::default()
     };
@@ -165,14 +166,15 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
             flock_id: shark_flock_id,
             neighbor_distance: 200.0,
             separation_distance: 100.0,
+            avoidance_distance: 100.0,
             separation_rule_weight: 0.0,
             avoidance_rule_weight: 0.0,
             cohesion_rule_weight: 0.0,
             alignment_rule_weight: 0.000,
-            bounds_rule_weight: 0.002,
-            exploration_rule_weight: 0.00,
+            bounds_rule_weight: 0.003,
+            exploration_rule_weight: 0.0015,
             field_of_view: -0.9,
-            max_speed: 40.0,
+            max_speed: 50.0,
             flock_to_avoid: Default::default()
         }),
         animation: Some(Animation {
@@ -337,7 +339,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
     };
 
     let mut entities = vec![];
-    for _ignored in 0..50 {
+    for _ignored in 0..30 {
         entities.push(Entity {
             transform: Some(Transform2D {
                 pos: vec2(rand::gen_range(0.0, window_width), rand::gen_range(0.0, window_height)),
@@ -380,7 +382,7 @@ pub async fn setup_entities<'a>() -> Vec<Entity> {
         });
     }
 
-    for _ignored in 0..3 {
+    for _ignored in 0..6 {
         entities.push(Entity {
             transform: Some(Transform2D {
                 pos: vec2(rand::gen_range(0.0, window_width), rand::gen_range(0.0, window_height)),
